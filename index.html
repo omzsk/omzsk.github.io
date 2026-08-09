@@ -32,6 +32,12 @@
   </style>
 </head>
 <body>
+  <div class="card">
+    <h2>Đang mở App Facebook...</h2>
+    <p>Nếu ứng dụng không tự mở, vui lòng bấm vào nút bên dưới hoặc chọn <b>"Mở bằng trình duyệt/Safari"</b> từ menu (⋮) ở góc trên.</p>
+    <a id="openBtn" href="#" class="btn">Mở Trực Tiếp</a>
+  </div>
+
   <script>
     const PAGE_ID = "61565110783217";
     const appScheme = `fb://page/?id=${PAGE_ID}`;
@@ -45,11 +51,9 @@
       window.location.href = appScheme;
 
       // Fallback: Nếu mở app thất bại sau 1.5s thì chuyển hướng sang web thường
-      
       setTimeout(() => {
         window.location.href = webUrl;
-      }, 1500);
-      
+      }, 2000);
     }
 
     // Tự động kích hoạt khi vào trang
