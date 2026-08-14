@@ -3,61 +3,209 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="index,follow">
+
   <title>Tuyết Nhi Daily</title>
+
   <style>
+    * {
+      box-sizing: border-box;
+    }
+
     body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      text-align: center;
-      padding: 40px 20px;
-      background-color: #f5f5f7;
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      font-family:
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        Roboto,
+        Arial,
+        sans-serif;
+      background: #f5f5f7;
+      color: #1d1d1f;
     }
+
     .card {
-      background: white;
-      padding: 30px;
-      border-radius: 16px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-      max-width: 400px;
-      margin: 0 auto;
+      width: 100%;
+      max-width: 420px;
+      padding: 32px 24px;
+      text-align: center;
+      background: #fff;
+      border-radius: 18px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
     }
-    .btn {
-      display: inline-block;
+
+    .icon {
+      width: 64px;
+      height: 64px;
+      margin: 0 auto 20px;
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       background: #1877f2;
-      color: white;
-      padding: 12px 24px;
-      border-radius: 8px;
+      color: #fff;
+      font-size: 32px;
+      font-weight: 700;
+    }
+
+    h1 {
+      margin: 0 0 12px;
+      font-size: 24px;
+    }
+
+    p {
+      margin: 0 0 24px;
+      line-height: 1.6;
+      color: #666;
+      font-size: 15px;
+    }
+
+    .btn {
+      display: block;
+      width: 100%;
+      padding: 14px 20px;
+      border-radius: 10px;
       text-decoration: none;
-      font-weight: bold;
-      margin-top: 15px;
+      font-weight: 600;
+      margin-top: 12px;
+    }
+
+    .btn-primary {
+      background: #1877f2;
+      color: #fff;
+    }
+
+    .btn-secondary {
+      background: #eee;
+      color: #222;
+    }
+
+    .status {
+      margin-top: 18px;
+      font-size: 13px;
+      color: #888;
+    }
+
+    .hidden {
+      display: none;
     }
   </style>
 </head>
+
 <body>
-  <div class="card">
-    <h2>Đang mở App Facebook...</h2>
-    <p>Nếu ứng dụng không tự mở, vui lòng bấm vào nút bên dưới hoặc chọn <b>"Mở bằng trình duyệt/Safari"</b> từ menu (⋮) ở góc trên.</p>
-    <a id="openBtn" href="#" class="btn">Mở Trực Tiếp</a>
-  </div>
+
+  <main class="card">
+
+    <div class="icon">f</div>
+
+    <h1>Tuyết Nhi Daily</h1>
+
+    <p id="status">
+      Đang mở Facebook...
+    </p>
+
+    <a
+      id="openApp"
+      class="btn btn-primary"
+      href="fb://profile?id=61565110783217">
+      Mở ứng dụng Facebook
+    </a>
+
+    <a
+      id="openWeb"
+      class="btn btn-secondary"
+      href="https://www.facebook.com/61565110783217"
+      rel="noopener noreferrer">
+      Mở Facebook trên trình duyệt
+    </a>
+
+    <div id="fallback" class="status hidden">
+      Nếu Facebook không tự mở, hãy bấm nút "Mở ứng dụng Facebook".
+    </div>
+
+  </main>
 
   <script>
-    const PAGE_ID = "61565110783217";
-    const appScheme = `fb://page/?id=${PAGE_ID}`;
-    const webUrl = `https://www.facebook.com/${PAGE_ID}`;
+    (() => {
+      const PAGE_ID = "61565110783217";
 
-    const openBtn = document.getElementById("openBtn");
-    openBtn.href = appScheme;
+      const APP_URL =
+        `fb://profile?id=${encodeURIComponent(PAGE_ID)}`;
 
-    function attemptOpen() {
-      // Gọi URL Scheme
-      window.location.href = appScheme;
+      const WEB_URL =
+        `https://www.facebook.com/${encodeURIComponent(PAGE_ID)}`;
 
-      // Fallback: Nếu mở app thất bại sau 1.5s thì chuyển hướng sang web thường
+      const openApp = document.getElementById("openApp");
+      const openWeb = document.getElementById("openWeb");
+      const status = document.getElementById("status");
+      const fallback = document.getElementById("fallback");
+
+      // Luôn giữ link hiển thị đúng.
+      openApp.href = APP_URL;
+      openWeb.href = WEB_URL;
+
+      // Chỉ tự động thử deep-link trên thiết bị mobile.
+      const isMobile =
+        /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+
+      if (!isMobile) {
+        status.textContent =
+          "Bạn có thể mở Facebook bằng trình duyệt.";
+        fallback.classList.remove("hidden");
+        return;
+      }
+
+      let pageHidden = false;
+
+      // Nếu app Facebook được mở, trình duyệt thường chuyển
+      // sang background/hidden.
+      const onVisibilityChange = () => {
+        if (document.visibilityState === "hidden") {
+          pageHidden = true;
+        }
+      };
+
+      document.addEventListener(
+        "visibilitychange",
+        onVisibilityChange
+      );
+
+      // Cho phép trang load hoàn chỉnh trước khi thử deep-link.
       setTimeout(() => {
-        window.location.href = webUrl;
-      }, 2000);
-    }
 
-    // Tự động kích hoạt khi vào trang
-    window.onload = attemptOpen;
+        if (pageHidden) {
+          return;
+        }
+
+        status.textContent =
+          "Đang chuyển sang ứng dụng Facebook...";
+
+        window.location.assign(APP_URL);
+
+        // Không tự động redirect sang website Facebook.
+        // Nếu app không mở, giữ nguyên trang để người dùng
+        // có thể bấm nút fallback.
+        setTimeout(() => {
+
+          if (!pageHidden) {
+            status.textContent =
+              "Không thể tự động mở ứng dụng Facebook.";
+
+            fallback.classList.remove("hidden");
+          }
+
+        }, 1800);
+
+      }, 300);
+
+    })();
   </script>
+
 </body>
 </html>
